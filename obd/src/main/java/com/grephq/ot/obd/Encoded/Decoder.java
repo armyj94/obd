@@ -43,6 +43,34 @@ public class Decoder {
     private static int hexToBinary(String hex){ return Integer.parseInt(hex, 2); }
 
     /**
+     * Convert hexadecimal string to an array of strings, each representing a byte
+     *
+     * @param hexString hexadecimal string to convert
+     * @return an array of String representing bytes*/
+    private static String[] stringToBytesString(String hexString) {
+        String cleanHexString =
+                hexString
+                        .replaceAll(" ", "") // Remove regular spaces
+                        .replaceAll("[\\u00A0]", "") // Remove non-breaking spaces
+                        .replaceAll("[\\u200B-\\u200D\\uFEFF]", "") // Remove zero-width spaces
+                        .replaceAll("\\p{Cntrl}", ""); // Remove control characters
+
+        if (cleanHexString.length() % 2 != 0) {
+            throw new IllegalArgumentException("Hex string must have an even number of characters");
+        }
+
+        String[] byteArrayStringArray = new String[cleanHexString.length() / 2];
+
+        for (int i = 0; i < cleanHexString.length(); i += 2) {
+            String byteString = cleanHexString.substring(i, i + 2);
+
+            byteArrayStringArray[i / 2] = byteString;
+        }
+
+        return byteArrayStringArray;
+    }
+
+    /**
      * Extract diagnostic trouble code from OBD response
      *
      * @param data OBD response
@@ -99,10 +127,8 @@ public class Decoder {
      * @return vehicle speed (km/h)
      */
     public static double decodeVehicleSpeed(String data) {
-        String[] bytes = data.split("\\s+");
-        int a = hexToDec(bytes[2]);
-
-        return a;
+        String[] bytes = stringToBytesString(data);
+        return hexToDec(bytes[2]);
     }
 
     /**
